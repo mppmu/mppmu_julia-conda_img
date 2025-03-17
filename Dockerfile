@@ -1,5 +1,4 @@
-FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
-
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 
 # Select bash as default shell to prevent errors in "/.singularity.d/actions/shell":
 RUN true \
@@ -17,6 +16,7 @@ WORKDIR /root
 
 RUN set -eux && export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
+    && apt-get install -y unminimize \
     && sed -i 's/apt-get upgrade$/apt-get upgrade -y/' `which unminimize` \
     && (echo y | unminimize) \
 	&& apt-get install -y --no-install-recommends ca-certificates \
@@ -66,53 +66,57 @@ ENV \
     MANPATH="/opt/julia/share/man:$MANPATH"
 
 RUN true\
-    && provisioning/install-sw.sh julia-bindist 1.10.9 /opt/julia-1.10 \
+    && mkdir /opt/julia-local \
+    && provisioning/install-sw.sh julia-bindist 1.10.10 /opt/julia-1.10 \
+    && (cd /opt/julia-1.10 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.10/bin && ln -s julia julia-1.10) \
-    && provisioning/install-sw.sh julia-bindist 1.11.4 /opt/julia-1.11 \
+    && provisioning/install-sw.sh julia-bindist 1.11.6 /opt/julia-1.11 \
+    && (cd /opt/julia-1.11 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.11/bin && ln -s julia julia-1.11) \
+    && provisioning/install-sw.sh julia-bindist 1.12.0-rc1 /opt/julia-1.12 \
+    && (cd /opt/julia-1.12 && ln -s ../julia-local local) \
+    && (cd /opt/julia-1.12/bin && ln -s julia julia-1.12) \
     && (cd /opt && ln -s julia-1.11 julia)
 
 
-# Install Miniforge3:
-
-COPY provisioning/install-sw-scripts/miniforge3-* provisioning/install-sw-scripts/
+# Install Pixi:
 
 ENV \
-    PATH="/opt/conda/bin:/opt/conda/condabin:$PATH" \
-    MANPATH="/opt/conda/share/man:$MANPATH" \
-    CONDA_EXE="/opt/conda/bin/conda" \
-    CONDA_PREFIX="/opt/conda" \
-    CONDA_PYTHON_EXE="/opt/conda/bin/python" \
+    PIXI_HOME="/opt/pixi" \
+    PIXI_GLOBALPRJ="/opt/pixi/global" \
+    PATH="/opt/pixi/bin:$PIXI_GLOBALPRJ/.pixi/envs/default/bin:$PATH" \
+    MANPATH="/opt/pixi/bin:$PIXI_GLOBALPRJ/.pixi/envs/default/man:$PATH" \
     PYTHON="python3" \
     JUPYTER="jupyter"
 
-    # PYTHON and JUPYTER environment variables for PyCall.jl and IJulia.jl
+RUN \
+    curl -fsSL https://pixi.sh/install.sh | bash -s -- --yes --no-modify-path \
+    && cd "$PIXI_HOME" \
+    && pixi config set default-channels '["conda-forge"]' --global \
+    && mkdir global && cd global \
+    && pixi init --channel conda-forge --channel bioconda . \
+    && pixi add python=3.12
 
-RUN true \
-    && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        fdupes libxdmcp6 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && provisioning/install-sw.sh miniforge3 24.11.3-2 /opt/conda
+# Install Jupyter with extensions, jupytext, as well as other packages:
 
-
-# Install Jupyter extensions, jupytext and cffconvert, as well as other packages:
-
-RUN true \
-    && mamba install -y \
-        matplotlib numpy \
+RUN cd "$PIXI_GLOBALPRJ" \
+    && pixi add \
+        pip \
+        matplotlib "numpy<2.2" \
         jupyterlab notebook nbformat nbconvert \
-        rise jupyterlab_rise jupyter_contrib_nbextensions bash_kernel \
+        jupyterlab_rise jupyter_contrib_nbextensions bash_kernel \
         jsonschema-with-format-nongpl webcolors \
-        css-html-js-minify \
         jupytext \
         click docopt pykwalify ruamel.yaml \
         mpi4py \
         pyjuliacall pyjuliapkg \
         voila ipympl \
-    && pip3 install \
+    && pixi add --pypi \
+        RISE \
         webio_jupyter_extension
 
-    # css-html-js-minify required for Franklin.jl
+# Note regarding versions:
+# * numpy v2.2 is incompatible with tensorflow v2.19, so restrict it to <2.2.
 
 
 # Install LaTeX (for Juypter PDF export and direct use):
@@ -132,7 +136,7 @@ ENV \
     PATH="/opt/nodejs/bin:$PATH" \
     MANPATH="/opt/nodejs/share/man:$MANPATH"
 
-RUN provisioning/install-sw.sh nodejs-bindist 22.14.0 /opt/nodejs
+RUN provisioning/install-sw.sh nodejs-bindist 22.17.1 /opt/nodejs
 
 
 # Install Java:
@@ -153,7 +157,7 @@ RUN true \
 
 RUN apt-get update && apt-get install -y \
         x11-xserver-utils mesa-utils \
-        libglu1-mesa libegl1-mesa \
+        libglu1-mesa libegl-mesa0 \
         xdg-utils \
         xvfb \
         libxss-dev libxtst-dev libxkbfile-dev \
@@ -165,12 +169,12 @@ RUN apt-get update && apt-get install -y \
 # Install VirtualGL:
 
 RUN apt-get update && apt-get install -y \
-        libglu1-mesa libegl1-mesa dbus-x11 \
+        libglu1-mesa libegl-mesa0 dbus-x11 \
     && wget \
-        https://github.com/VirtualGL/virtualgl/releases/download/3.1.2/virtualgl_3.1.2_amd64.deb \
-        https://github.com/TurboVNC/turbovnc/releases/download/3.1.4/turbovnc_3.1.4_amd64.deb \
-    && dpkg -i virtualgl_3.1.2_amd64.deb turbovnc_3.1.4_amd64.deb \
-    && rm virtualgl_3.1.2_amd64.deb turbovnc_3.1.4_amd64.deb \
+        https://github.com/VirtualGL/virtualgl/releases/download/3.1.3/virtualgl_3.1.3_amd64.deb \
+        https://github.com/TurboVNC/turbovnc/releases/download/3.2/turbovnc_3.2_amd64.deb \
+    && dpkg -i virtualgl_3.1.3_amd64.deb turbovnc_3.2_amd64.deb \
+    && rm virtualgl_3.1.3_amd64.deb turbovnc_3.2_amd64.deb \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
@@ -187,7 +191,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
         htop nmon \
         nano vim \
         git-gui gitk \
-        ncat netcat \
+        ncat netcat-openbsd \
         ncurses-term \
         parallel \
     && apt-get clean && rm -rf /var/lib/apt/lists/*

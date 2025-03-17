@@ -18,12 +18,9 @@ pkg_install() {
     download "${DOWNLOAD_URL}" \
         | tar --strip-components=1 -x -z -f - -C "${INSTALL_PREFIX}"
 
-    # For rjulia and embedding Julia:
-    (cd "${INSTALL_PREFIX}/lib" && ln -s "julia/libstdc++.so.6" .)
-
-    JLVER=`"${INSTALL_PREFIX}/bin/julia" -e 'println("$(VERSION.major).$(VERSION.minor)")'`
-    mkdir -p "/buildworker/worker/package_linux64/build/usr/share/julia/stdlib"
-    ln -s "${INSTALL_PREFIX}/share/julia/stdlib/v${JLVER}" "/buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v${JLVER}"
+    #JLVER=`"${INSTALL_PREFIX}/bin/julia" -e 'println("$(VERSION.major).$(VERSION.minor)")'`
+    #mkdir -p "/buildworker/worker/package_linux64/build/usr/share/julia/stdlib"
+    #ln -s "${INSTALL_PREFIX}/share/julia/stdlib/v${JLVER}" "/buildworker/worker/package_linux64/build/usr/share/julia/stdlib/v${JLVER}"
 }
 
 
