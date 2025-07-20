@@ -62,7 +62,7 @@ COPY provisioning/install-sw.sh /root/provisioning/
 COPY provisioning/install-sw-scripts/julia-* provisioning/install-sw-scripts/
 
 ENV \
-    PATH="/opt/julia/bin:/opt/julia-1.11/bin:/opt/julia-1.10/bin:/opt/julia-1.9/bin:/opt/julia-1.6/bin:$PATH" \
+    PATH="/opt/julia/bin:/opt/julia-1.12/bin:/opt/julia-1.11/bin:/opt/julia-1.10/bin:$PATH" \
     MANPATH="/opt/julia/share/man:$MANPATH"
 
 RUN true\
