@@ -81,26 +81,24 @@ RUN true\
 
 # Install Pixi:
 
+COPY provisioning/install-sw-scripts/pixi-* provisioning/install-sw-scripts/
+
+RUN provisioning/install-sw.sh pixi current /opt/pixi
+
 ENV \
     PIXI_HOME="/opt/pixi" \
     PIXI_GLOBALPRJ="/opt/pixi/global" \
-    PATH="/opt/pixi/bin:$PIXI_GLOBALPRJ/.pixi/envs/default/bin:$PATH" \
-    MANPATH="/opt/pixi/bin:$PIXI_GLOBALPRJ/.pixi/envs/default/man:$PATH" \
+    PIXI_GLOBALBIN="/opt/pixi/global/.pixi/envs/default/bin" \
+    PATH="/opt/pixi/bin:/opt/pixi/global/.pixi/envs/default/bin:$PATH" \
+    MANPATH="/opt/pixi/global/.pixi/envs/default/man:$MANPATH" \
     PYTHON="python3" \
     JUPYTER="jupyter"
 
-RUN \
-    curl -fsSL https://pixi.sh/install.sh | bash -s -- --yes --no-modify-path \
-    && cd "$PIXI_HOME" \
-    && pixi config set default-channels '["conda-forge"]' --global \
-    && mkdir global && cd global \
-    && pixi init --channel conda-forge --channel bioconda . \
-    && pixi add python=3.12
-
-# Install Jupyter with extensions, jupytext, as well as other packages:
+# Install Python, Jupyter, etc.:
 
 RUN cd "$PIXI_GLOBALPRJ" \
     && pixi add \
+        python=3.12 \
         pip \
         matplotlib "numpy<2.2" \
         jupyterlab notebook nbformat nbconvert \
