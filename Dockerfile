@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 # Select bash as default shell to prevent errors in "/.singularity.d/actions/shell":
 RUN true \
@@ -48,7 +48,7 @@ RUN set -eux && export DEBIAN_FRONTEND=noninteractive \
 # Install Nvidia visual profilers:
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        cuda-nsight-systems-12-6 cuda-nsight-12-6 \
+        cuda-nsight-systems-12-8 cuda-nsight-12-8 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
