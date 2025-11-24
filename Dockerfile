@@ -100,7 +100,7 @@ RUN cd "$PIXI_GLOBALPRJ" \
     && pixi add \
         python=3.12 \
         pip \
-        matplotlib "numpy<2.2" \
+        matplotlib numpy \
         jupyterlab notebook nbformat nbconvert \
         jupyterlab_rise jupyter_contrib_nbextensions bash_kernel \
         jsonschema-with-format-nongpl webcolors \
