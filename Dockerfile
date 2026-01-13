@@ -57,6 +57,15 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 COPY provisioning/install-sw.sh /root/provisioning/
 
 
+# Install LaTeX (for Juypter PDF export and direct use):
+
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y \
+        texlive texlive-latex-extra texlive-extra-utils texlive-science \
+        texlive-fonts-extra texlive-bibtex-extra texlive-pstricks latexmk \
+        biber feynmf latexdiff dvipng texlive-xetex pdf2svg cm-super \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
 # Install Julia:
 
 COPY provisioning/install-sw-scripts/julia-* provisioning/install-sw-scripts/
@@ -112,15 +121,6 @@ RUN cd "$PIXI_GLOBALPRJ" \
     && pixi add --pypi \
         RISE \
         webio_jupyter_extension
-
-
-# Install LaTeX (for Juypter PDF export and direct use):
-
-RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y \
-        texlive texlive-latex-extra texlive-extra-utils texlive-science \
-        texlive-fonts-extra texlive-bibtex-extra texlive-pstricks latexmk \
-        biber feynmf latexdiff dvipng texlive-xetex pdf2svg cm-super \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
 # Install Node.js:
