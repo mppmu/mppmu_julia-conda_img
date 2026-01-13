@@ -100,7 +100,7 @@ RUN cd "$PIXI_GLOBALPRJ" \
     && pixi add \
         python=3.12 \
         pip \
-        matplotlib numpy \
+        matplotlib numpy numba \
         jupyterlab notebook nbformat nbconvert \
         jupyterlab_rise jupyter_contrib_nbextensions bash_kernel \
         jsonschema-with-format-nongpl webcolors \
@@ -112,9 +112,6 @@ RUN cd "$PIXI_GLOBALPRJ" \
     && pixi add --pypi \
         RISE \
         webio_jupyter_extension
-
-# Note regarding versions:
-# * numpy v2.2 is incompatible with tensorflow v2.19, so restrict it to <2.2.
 
 
 # Install LaTeX (for Juypter PDF export and direct use):
