@@ -82,7 +82,7 @@ RUN true\
     && provisioning/install-sw.sh julia-bindist 1.11.9 /opt/julia-1.11 \
     && (cd /opt/julia-1.11 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.11/bin && ln -s julia julia-1.11) \
-    && provisioning/install-sw.sh julia-bindist 1.12.4 /opt/julia-1.12 \
+    && provisioning/install-sw.sh julia-bindist 1.12.5 /opt/julia-1.12 \
     && (cd /opt/julia-1.12 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.12/bin && ln -s julia julia-1.12) \
     && (cd /opt && ln -s julia-1.12 julia)
