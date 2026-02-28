@@ -71,7 +71,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 COPY provisioning/install-sw-scripts/julia-* provisioning/install-sw-scripts/
 
 ENV \
-    PATH="/opt/julia/bin:/opt/julia-1.12/bin:/opt/julia-1.11/bin:/opt/julia-1.10/bin:$PATH" \
+    PATH="/opt/julia/bin:/opt/julia-1.12/bin:/opt/julia-1.10/bin:$PATH" \
     MANPATH="/opt/julia/share/man:$MANPATH"
 
 RUN true\
@@ -79,9 +79,6 @@ RUN true\
     && provisioning/install-sw.sh julia-bindist 1.10.10 /opt/julia-1.10 \
     && (cd /opt/julia-1.10 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.10/bin && ln -s julia julia-1.10) \
-    && provisioning/install-sw.sh julia-bindist 1.11.9 /opt/julia-1.11 \
-    && (cd /opt/julia-1.11 && ln -s ../julia-local local) \
-    && (cd /opt/julia-1.11/bin && ln -s julia julia-1.11) \
     && provisioning/install-sw.sh julia-bindist 1.12.5 /opt/julia-1.12 \
     && (cd /opt/julia-1.12 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.12/bin && ln -s julia julia-1.12) \
