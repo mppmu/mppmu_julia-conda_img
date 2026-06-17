@@ -71,17 +71,20 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 COPY provisioning/install-sw-scripts/julia-* provisioning/install-sw-scripts/
 
 ENV \
-    PATH="/opt/julia/bin:/opt/julia-1.12/bin:/opt/julia-1.10/bin:$PATH" \
+    PATH="/opt/julia/bin:/opt/julia-1.13/bin:/opt/julia-1.12/bin:/opt/julia-1.10/bin:$PATH" \
     MANPATH="/opt/julia/share/man:$MANPATH"
 
 RUN true\
     && mkdir /opt/julia-local \
-    && provisioning/install-sw.sh julia-bindist 1.10.10 /opt/julia-1.10 \
+    && provisioning/install-sw.sh julia-bindist 1.10.11 /opt/julia-1.10 \
     && (cd /opt/julia-1.10 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.10/bin && ln -s julia julia-1.10) \
-    && provisioning/install-sw.sh julia-bindist 1.12.5 /opt/julia-1.12 \
+    && provisioning/install-sw.sh julia-bindist 1.12.6 /opt/julia-1.12 \
     && (cd /opt/julia-1.12 && ln -s ../julia-local local) \
     && (cd /opt/julia-1.12/bin && ln -s julia julia-1.12) \
+    && provisioning/install-sw.sh julia-bindist 1.13.0-rc1 /opt/julia-1.13 \
+    && (cd /opt/julia-1.13 && ln -s ../julia-local local) \
+    && (cd /opt/julia-1.13/bin && ln -s julia julia-1.13) \
     && (cd /opt && ln -s julia-1.12 julia)
 
 
