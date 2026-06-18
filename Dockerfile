@@ -137,12 +137,11 @@ RUN provisioning/install-sw.sh nodejs-bindist 24.16.0 /opt/nodejs
 # Install Rust:
 
 ENV \
-    RUSTUP_HOME="/opt/rust" \
-    CARGO_HOME="/opt/rust" \
     PATH="/opt/rust/toolchains/stable-x86_64-unknown-linux-gnu/bin:$PATH" \
     MANPATH="/opt/rust/toolchains/stable-x86_64-unknown-linux-gnu/share/man:$MANPATH"
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    RUSTUP_HOME="/opt/rust" CARGO_HOME="/opt/rust" \
     sh -s -- -y --no-modify-path --profile default --default-toolchain stable
 
 
