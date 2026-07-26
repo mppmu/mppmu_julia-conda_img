@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
+FROM nvidia/cuda:13.0.2-cudnn-devel-ubuntu24.04
 
 # Select bash as default shell to prevent errors in "/.singularity.d/actions/shell":
 RUN true \
@@ -50,9 +50,9 @@ RUN set -eux && export DEBIAN_FRONTEND=noninteractive \
 
 RUN set -eux && export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
-    && apt-get install -y cuda-nsight-systems-12-8 \
+    && apt-get install -y cuda-nsight-systems-13-0 \
     && if [ "`dpkg --print-architecture`" = "amd64" ] ; then \
-        apt-get install -y cuda-nsight-12-8 ; \
+        apt-get install -y cuda-nsight-13-0 ; \
     fi \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
