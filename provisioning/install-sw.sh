@@ -48,6 +48,37 @@ get_linux_dist_info() {
 }
 
 
+get_arch_info() {
+    # ARCH uses "uname -m" naming (x86_64, aarch64), ARCH_DEB uses Debian
+    # naming (amd64, arm64). Package-specific architecture names (Julia,
+    # Node.js, ...) are derived in the individual setup scripts.
+
+    ARCH=`uname -m`
+    case "${ARCH}" in
+        x86_64)  ARCH_DEB="amd64" ;;
+        aarch64) ARCH_DEB="arm64" ;;
+        *)
+            echo "ERROR: Unsupported architecture \"${ARCH}\"." >&2
+            exit 1
+            ;;
+    esac
+
+    echo "Architecture: ${ARCH} (Debian arch \"${ARCH_DEB}\")"
+}
+
+
+install_deb() {
+    # Install a local .deb file, resolving dependencies via apt-get if
+    # available (plain dpkg leaves packages unconfigured on missing deps).
+
+    if (hash apt-get 2>/dev/null) ; then
+        DEBIAN_FRONTEND=noninteractive apt-get install -y "./${1}"
+    else
+        dpkg -i "${1}"
+    fi
+}
+
+
 download() {
     if (hash curl 2>/dev/null) ; then
         curl -L "$1"
@@ -97,6 +128,7 @@ shift 3
 
 
 get_linux_dist_info
+get_arch_info
 
 . "${SCRIPT_DIR}/install-sw-scripts/${PACKAGE_NAME}-setup.sh"
 

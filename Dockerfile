@@ -46,9 +46,14 @@ RUN set -eux && export DEBIAN_FRONTEND=noninteractive \
 
 
 # Install Nvidia visual profilers:
+# Note: Nsight Eclipse Edition (cuda-nsight) is only available for x86_64.
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-        cuda-nsight-systems-12-8 cuda-nsight-12-8 \
+RUN set -eux && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install -y cuda-nsight-systems-12-8 \
+    && if [ "`dpkg --print-architecture`" = "amd64" ] ; then \
+        apt-get install -y cuda-nsight-12-8 ; \
+    fi \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
@@ -136,8 +141,9 @@ RUN provisioning/install-sw.sh nodejs-bindist 24.16.0 /opt/nodejs
 
 # Install Java:
 
-# JavaCall.jl needs JAVA_HOME to locate libjvm.so:
-ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+# JavaCall.jl needs JAVA_HOME to locate libjvm.so. OpenJDK installs into an
+# architecture-dependent directory, so provide an arch-independent symlink:
+ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk"
 
 RUN true \
     && apt-get update \
@@ -145,6 +151,8 @@ RUN true \
     && add-apt-repository -y ppa:openjdk-r/ppa \
     && apt-get update \
     && apt-get install -y openjdk-11-jdk \
+    && ln -s "java-11-openjdk-`dpkg --print-architecture`" "${JAVA_HOME}" \
+    && test -f "${JAVA_HOME}/lib/server/libjvm.so" \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
@@ -161,15 +169,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
-# Install VirtualGL:
+# Install VirtualGL and TurboVNC:
+
+COPY provisioning/install-sw-scripts/virtualgl-* provisioning/install-sw-scripts/turbovnc-* provisioning/install-sw-scripts/
 
 RUN apt-get update && apt-get install -y \
         libglu1-mesa libegl-mesa0 dbus-x11 \
-    && wget \
-        https://github.com/VirtualGL/virtualgl/releases/download/3.1.4/virtualgl_3.1.4_amd64.deb \
-        https://github.com/TurboVNC/turbovnc/releases/download/3.3/turbovnc_3.3_amd64.deb \
-    && dpkg -i virtualgl_3.1.4_amd64.deb turbovnc_3.3_amd64.deb \
-    && rm virtualgl_3.1.4_amd64.deb turbovnc_3.3_amd64.deb \
+    && provisioning/install-sw.sh virtualgl-bindist 3.1.4 /opt/VirtualGL \
+    && provisioning/install-sw.sh turbovnc-bindist 3.3 /opt/TurboVNC \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 

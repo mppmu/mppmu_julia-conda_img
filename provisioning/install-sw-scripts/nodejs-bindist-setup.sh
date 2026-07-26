@@ -11,7 +11,16 @@ pkg_installed_check() {
 pkg_install() {
     PACKAGE_VERSION_MAJOR=`echo "${PACKAGE_VERSION}" | cut -f 1,2 -d . | grep -o '[0-9.]*'`
 
-    DOWNLOAD_URL="https://nodejs.org/dist/v${PACKAGE_VERSION}/node-v${PACKAGE_VERSION}-linux-x64.tar.xz"
+    case "${ARCH}" in
+        x86_64)  NODEJS_ARCH="x64"   ;;
+        aarch64) NODEJS_ARCH="arm64" ;;
+        *)
+            echo "ERROR: No Node.js binary distribution for architecture \"${ARCH}\"." >&2
+            exit 1
+            ;;
+    esac
+
+    DOWNLOAD_URL="https://nodejs.org/dist/v${PACKAGE_VERSION}/node-v${PACKAGE_VERSION}-linux-${NODEJS_ARCH}.tar.xz"
     echo "INFO: Download URL: \"${DOWNLOAD_URL}\"." >&2
 
     mkdir -p "${INSTALL_PREFIX}"

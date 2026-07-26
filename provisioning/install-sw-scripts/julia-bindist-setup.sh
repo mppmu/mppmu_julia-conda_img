@@ -11,7 +11,16 @@ pkg_installed_check() {
 pkg_install() {
     PACKAGE_VERSION_MAJOR=`echo "${PACKAGE_VERSION}" | cut -f 1,2 -d . | grep -o '[0-9.]*'`
 
-    DOWNLOAD_URL="https://julialang-s3.julialang.org/bin/linux/x64/${PACKAGE_VERSION_MAJOR}/julia-${PACKAGE_VERSION}-linux-x86_64.tar.gz"
+    case "${ARCH}" in
+        x86_64)  JULIA_ARCH="x64"     ;;
+        aarch64) JULIA_ARCH="aarch64" ;;
+        *)
+            echo "ERROR: No Julia binary distribution for architecture \"${ARCH}\"." >&2
+            exit 1
+            ;;
+    esac
+
+    DOWNLOAD_URL="https://julialang-s3.julialang.org/bin/linux/${JULIA_ARCH}/${PACKAGE_VERSION_MAJOR}/julia-${PACKAGE_VERSION}-linux-${ARCH}.tar.gz"
     echo "INFO: Download URL: \"${DOWNLOAD_URL}\"." >&2
 
     mkdir -p "${INSTALL_PREFIX}"
